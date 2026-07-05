@@ -1,10 +1,4 @@
 {
-<<<<<<< HEAD
-    "cmake.environment": {
-        "PATH": "/opt/llvm-mos/bin:${env:PATH}"
-    },
-=======
->>>>>>> template/main
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "cmake.showSystemKits": false,
     "cmake.options.advanced": {

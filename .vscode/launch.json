@@ -1,10 +1,4 @@
 {
-<<<<<<< HEAD
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "RP6502",
-=======
     // Two ways to "Start Debugging" (F5):
     //   RP6502 (Emulator) — source-level debug in rp6502 emulator.
     //   RP6502 (Hardware) — upload + run on a real Picocomputer.
@@ -28,7 +22,6 @@
         },
         {
             "name": "RP6502 (Hardware)",
->>>>>>> template/main
             "type": "debugpy",
             "request": "launch",
             "console": "integratedTerminal",

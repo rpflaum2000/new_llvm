@@ -18,13 +18,10 @@ import sys
 import select
 import ctypes
 import json
-<<<<<<< HEAD
-=======
 import glob
 import shlex
 import shutil
 import socket
->>>>>>> template/main
 from typing import Union
 
 # POSIX
@@ -51,11 +48,7 @@ SCRIPT_NAME = os.path.splitext(SCRIPT_FILE)[0].upper()
 RESPONSE_TIMEOUT = 2.0
 
 
-<<<<<<< HEAD
-class SerialPort:
-=======
 class SerialDevice:
->>>>>>> template/main
     """Cross-platform serial port implementation."""
 
     def __init__(self, port: str):
@@ -267,13 +260,6 @@ class SerialDevice:
         """Send a break signal."""
         duration = 0.1  # works down to 300bps
         if self._is_posix:
-<<<<<<< HEAD
-            try:
-                fcntl.ioctl(self._fd, 0x5427)  # TIOCSBRK
-                time.sleep(duration)
-            finally:
-                fcntl.ioctl(self._fd, 0x5428)  # TIOCCBRK
-=======
             if platform.system() == "Darwin":
                 TIOCSBRK, TIOCCBRK = 0x2000747B, 0x2000747A
             else:
@@ -284,7 +270,6 @@ class SerialDevice:
                 fcntl.ioctl(self._fd, TIOCCBRK)
             except Exception:
                 termios.tcsendbreak(self._fd, 0)
->>>>>>> template/main
         else:
             try:
                 kernel32.EscapeCommFunction(self._handle, 8)  # SETBREAK
@@ -308,8 +293,6 @@ class SerialDevice:
             self._handle = None
 
 
-<<<<<<< HEAD
-=======
 class TelnetDevice:
     """Telnet connection per RFC 854/855 with Q-method (RFC 1143) negotiation."""
 
@@ -566,7 +549,6 @@ class TelnetDevice:
             self._sock = None
 
 
->>>>>>> template/main
 class Console:
     """Manages the RIA console over a serial connection."""
 
@@ -575,32 +557,15 @@ class Console:
         if platform.system() == "Windows":
             return "COM1"
         elif platform.system() == "Darwin":
-<<<<<<< HEAD
-=======
             devices = sorted(glob.glob("/dev/cu.usbmodem*"))
             if devices:
                 return devices[0]
->>>>>>> template/main
             return "/dev/cu.usbmodem"
         elif platform.system() == "Linux":
             return "/dev/ttyACM0"
         else:
             return "/dev/tty"
 
-<<<<<<< HEAD
-    def __init__(self, name):
-        """Initialize console over serial connection."""
-        self.serial = SerialPort(name)
-        self.serial.open()
-
-    def code_page(self, timeout: float = RESPONSE_TIMEOUT) -> str:
-        """Fetch code page to use for terminal encoding"""
-        self.serial.write(b"set cp\r")
-        self.wait_for_prompt(":", timeout)
-        result = self.serial.read_until().decode("ascii")
-        self.wait_for_prompt("]", timeout)
-        return f"cp{re.sub(r'[^0-9]', '', result)}"
-=======
     def __init__(self, port):
         """Initialize console over serial or telnet connection."""
         self.serial = port
@@ -642,7 +607,6 @@ class Console:
                 out.append(f"\\{byte:03o}")
         out.append('"')
         return "".join(out)
->>>>>>> template/main
 
     def terminal(self, cp):
         """Dispatch to the correct terminal emulator"""
@@ -879,11 +843,7 @@ class Console:
 
     def upload(self, file, name: str):
         """Upload readable file to remote file "name"."""
-<<<<<<< HEAD
-        self.serial.write(bytes(f"UPLOAD {json.dumps(name)}\r", "ascii"))
-=======
         self.serial.write(bytes(f"UPLOAD {self.quote(name)}\r", "ascii"))
->>>>>>> template/main
         self.wait_for_prompt("}")
         file.seek(0)
         while True:
@@ -892,27 +852,18 @@ class Console:
                 break
             command = f"${len(chunk):03X} ${binascii.crc32(chunk):08X}\r"
             self.serial.write(bytes(command, "ascii"))
-<<<<<<< HEAD
-=======
             self.serial.read_until(b"\n")
->>>>>>> template/main
             self.serial.write(chunk)
             self.wait_for_prompt("}")
         self.serial.write(b"END\r")
         self.wait_for_prompt("]")
 
-<<<<<<< HEAD
-    def load(self, name: str):
-        """Load a previously uploaded ROM file."""
-        self.serial.write(f"LOAD {json.dumps(name)}\r".encode("ascii"))
-=======
     def load(self, name: str, args=()):
         """Load a previously uploaded ROM file, passing args as its argv."""
         line = f"LOAD {self.quote(name)}"
         for arg in args:
             line += f" {self.quote(arg)}"
         self.serial.write(f"{line}\r".encode("ascii"))
->>>>>>> template/main
         self.serial.read_until()
 
     def reset(self):
@@ -1139,8 +1090,6 @@ class ROM:
         return None, None
 
 
-<<<<<<< HEAD
-=======
 class Emulator:
     """rp6502-emu discovery and debug-adapter error reporting."""
 
@@ -1276,7 +1225,6 @@ class Emulator:
             send(response)
 
 
->>>>>>> template/main
 def exec_args():
     # Standard library argument parser
     class CustomFormatter(argparse.HelpFormatter):
@@ -1290,10 +1238,7 @@ def exec_args():
     sp = parser.add_subparsers(dest="command", required=True)
     cmds = {
         "term": ("Attach to the RIA console.", None),
-<<<<<<< HEAD
-=======
         "emu": ("Launch emulator from config (for IDE).", None),
->>>>>>> template/main
         "run": ("Run local ROM by sending to RIA.", 1),
         "upload": ("Upload local files to RIA USB storage.", "+"),
         "basic": ("Executes a program with the installed BASIC.", 1),
@@ -1311,8 +1256,6 @@ def exec_args():
                 nargs=nargs,
                 help="Local filename." if nargs == 1 else "Local filename(s).",
             )
-<<<<<<< HEAD
-=======
     # Everything after the ROM filename is the ROM's argv, like `LOAD rom args...`.
     parsers["run"].add_argument(
         "rom_args",
@@ -1320,7 +1263,6 @@ def exec_args():
         metavar="args",
         help="Arguments passed to the ROM.",
     )
->>>>>>> template/main
     parser.add_argument(
         "-a",
         "--address",
@@ -1356,11 +1298,7 @@ def exec_args():
         "--config",
         dest="config",
         metavar="name",
-<<<<<<< HEAD
-        help=f"Configuration file for console connection.",
-=======
         help=f"Configuration file for debug settings.",
->>>>>>> template/main
     )
     parser.add_argument(
         "-d",
@@ -1368,11 +1306,7 @@ def exec_args():
         dest="device",
         metavar="dev",
         default=Console.default_device(),
-<<<<<<< HEAD
-        help=f"Serial device name. Default={Console.default_device()}",
-=======
         help=f"Serial device or telnet address:port. Default={Console.default_device()}",
->>>>>>> template/main
     )
     parser.add_argument(
         # Hidden alias for anyone used to minicom -D /dev/
@@ -1383,21 +1317,12 @@ def exec_args():
         help=argparse.SUPPRESS,
     )
     parser.add_argument(
-<<<<<<< HEAD
-        "-t",
-        "--term",
-        dest="term",
-        metavar="bool",
-        default="True",
-        help=f"Attach to console terminal on run.",
-=======
         "-k",
         "--key",
         dest="key",
         metavar="key",
         default=None,
         help="Passkey for telnet authentication. Device becomes telnet host.",
->>>>>>> template/main
     )
     parser.add_argument(
         "-w",
@@ -1407,27 +1332,6 @@ def exec_args():
         default=None,
         help="Remote directory to work in.",
     )
-<<<<<<< HEAD
-    args = parser.parse_args()
-
-    # Standard library configuration parser
-    if args.config:
-        config = configparser.ConfigParser()
-        if not os.path.exists(args.config):
-            config[SCRIPT_NAME] = {
-                "device": args.device,
-                "term": args.term,
-                "workdir": args.workdir or "",
-            }
-            with open(args.config, "w") as cfg:
-                config.write(cfg)
-        else:
-            config.read(args.config)
-        if config.has_section(SCRIPT_NAME):
-            args.device = config[SCRIPT_NAME].get("device", args.device)
-            args.term = config[SCRIPT_NAME].get("term", args.term)
-            args.workdir = config[SCRIPT_NAME].get("workdir", "") or None
-=======
     parser.add_argument(
         "-t",
         "--term",
@@ -1484,7 +1388,6 @@ def exec_args():
 
     if args.workdir:
         args.workdir = args.workdir.strip().strip("/") or None
->>>>>>> template/main
 
     # Because parser is bad at bool
     if args.term.lower() in ["t", "true"] or (args.term.isdigit() and args.term != "0"):
@@ -1514,8 +1417,6 @@ def exec_args():
                 return s
         return None
 
-<<<<<<< HEAD
-=======
     def timed_upload(console, file, name):
         """Upload with timing and throughput logging."""
         file.seek(0)
@@ -1537,18 +1438,10 @@ def exec_args():
         except ValueError as e:
             raise RuntimeError(f"Cannot parse 'args' in {args.config}: {e}")
 
->>>>>>> template/main
     # Open console and extend error with a hint about the config file
     if args.command in ["term", "run", "upload", "basic"]:
         if args.config:
             print(f"[{SCRIPT_FILE}] Using device config in {args.config}")
-<<<<<<< HEAD
-        print(f"[{SCRIPT_FILE}] Opening device {args.device}")
-        console = Console(args.device)
-        console.send_break()
-        if args.workdir:
-            console.command(f"CD {json.dumps(args.workdir)}")
-=======
         if args.key:
             host, _, port_str = args.device.rpartition(":")
             if host and port_str.isdigit():
@@ -1565,7 +1458,6 @@ def exec_args():
         console.send_break()
         if args.workdir:
             console.command(f"CD {console.quote('/' + args.workdir)}")
->>>>>>> template/main
 
     if args.command == "term":
         code_page = console.code_page()
@@ -1579,11 +1471,6 @@ def exec_args():
         rom.add_rom_file(args.filename[0])
         print(f"[{SCRIPT_FILE}] Uploading ROM")
         with open(args.filename[0], "rb") as f:
-<<<<<<< HEAD
-            console.upload(f, os.path.basename(args.filename[0]))
-        print(f"[{SCRIPT_FILE}] Loading ROM")
-        console.load(os.path.basename(args.filename[0]))
-=======
             timed_upload(console, f, os.path.basename(args.filename[0]))
         print(f"[{SCRIPT_FILE}] Loading ROM")
         rom_args = args.rom_args
@@ -1592,7 +1479,6 @@ def exec_args():
         if not rom_args:
             rom_args = config_rom_args()
         console.load(os.path.basename(args.filename[0]), rom_args)
->>>>>>> template/main
         if args.term:
             console.terminal(code_page)
 
@@ -1604,11 +1490,7 @@ def exec_args():
                     dest = args.out
                 else:
                     dest = os.path.basename(file)
-<<<<<<< HEAD
-                console.upload(f, dest)
-=======
                 timed_upload(console, f, dest)
->>>>>>> template/main
 
     if args.command == "basic":
         code_page = console.code_page()
@@ -1640,21 +1522,6 @@ def exec_args():
         args.irq = str_to_address(parser, args.irq, "-i/--irq")
         print(f"[{os.path.basename(__file__)}] Creating {args.out}")
         rom = ROM()
-<<<<<<< HEAD
-        print(f"[{os.path.basename(__file__)}] Adding binary asset {args.filename[0]}")
-        if isinstance(args.address, str):
-            with open(args.filename[0], "rb") as f:
-                rom.add_asset(args.address, f.read())
-        else:
-            rom.add_binary_file(
-                args.filename[0],
-                data=args.address,
-                nmi=args.nmi,
-                reset=args.reset,
-                irq=args.irq,
-            )
-        for file in args.filename[1:]:
-=======
         if args.address is None:
             for vec_value, vec_flag in (
                 (args.nmi, "-n/--nmi"),
@@ -1689,7 +1556,6 @@ def exec_args():
                 )
             extras_start = 1
         for file in args.filename[extras_start:]:
->>>>>>> template/main
             print(f"[{os.path.basename(__file__)}] Adding ROM asset {file}")
             rom.add_rom_file(file)
         with open(args.out, "wb+") as file:
@@ -1718,8 +1584,6 @@ def exec_args():
                 )
                 file.write(asset_data)
 
-<<<<<<< HEAD
-=======
     if args.command == "emu":
         # `emu` exists to launch the emulator as the IDE's debug adapter, which
         # always passes the project config (for the emulator path and --ini), so
@@ -1769,28 +1633,12 @@ def exec_args():
             # Backstop for exec failures on a path shutil.which deemed runnable.
             raise RuntimeError(f"Cannot run emulator '{emulator}'{config_hint}: {e}")
 
->>>>>>> template/main
 
 # This file may be included or run like a program.
 if __name__ == "__main__":
     # VSCode SIGKILLs the terminal while in raw mode, return to cooked mode.
     if "tty" in globals() and sys.stdin.isatty():
         os.system("stty sane")
-<<<<<<< HEAD
-    # These exceptions are a normal part of using this tool in a build system.
-    # It's annoying when a debugger catches them so we intercept to exit cleanly.
-    try:
-        exec_args()
-    except (ROMException, FileNotFoundError, TimeoutError, RuntimeError) as e:
-        # Unresolved variable substitutions like ${command:cmake.launchTargetPath}
-        if re.search(r"\$\{[^}]*\}", str(e)):
-            print(
-                f"[{os.path.basename(__file__)}] Check build for failures",
-                file=sys.stderr,
-            )
-        print(f"[{os.path.basename(__file__)}] {e}", file=sys.stderr)
-        os._exit(1)  # special exit without raising
-=======
     try:
         exec_args()
     except Exception as e:
@@ -1821,4 +1669,3 @@ if __name__ == "__main__":
             print(f"[{SCRIPT_FILE}] Check build for failures", file=sys.stderr)
         print(f"[{SCRIPT_FILE}] {e}", file=sys.stderr)
         os._exit(1)  # Special exit without raising debugger.
->>>>>>> template/main
