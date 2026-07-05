@@ -50,6 +50,7 @@ $ code .
 
 Install the recommended extensions when VS Code prompts you, choosing the
 default or obvious choice for any other prompts. The tools we use in VS Code
+<<<<<<< HEAD
 are constantly improving and changing making it too difficult to maintain
 documentation. Choose "[Unspecified]" for the CMake kit.
 
@@ -59,10 +60,40 @@ Connect with a USB cable plugged into the RP6502-VGA USB port.
 If you get a Python error about the communications device not being found,
 edit `.rp6502` in the project root. This file will be created the first time
 you "Start Debugging" and will be ignored by git.
+=======
+are constantly improving and have their own documentation. The first problem
+you might encounter is that no kit is configured, so begin by reading this
+and choosing the `[Unspecified]` kit:
+https://code.visualstudio.com/docs/cpp/cmake-linux
+The full documentation for the CMake plugin is here:
+https://github.com/microsoft/vscode-cmake-tools/blob/main/docs/README.md
+
+"Start Debugging" (F5) offers two launch configurations:
+
+ * **RP6502 (Emulator)** is the default. It builds your project and runs it with
+   source-level debugging in the rp6502 emulator.
+ * **RP6502 (Hardware)** builds your project and runs it on a Picocomputer 6502.
+   Connect with telnet or a USB cable plugged into the RP6502-VGA USB port.
+
+Both read `.rp6502` in the project root. This file is created the first time you
+"Start Debugging" and is ignored by git.
+
+For the emulator, the `emulator` setting must point to the `rp6502-emu`
+executable (a bare name is searched on your PATH).
+
+For hardware, set `device` to the serial port. If you get a Python error about
+the communications device not being found, edit `device` in `.rp6502`. You may
+also connect over telnet by instead providing a hostname for the device and
+setting the key.
+>>>>>>> template/main
 
 Once the program is running, a debug console becomes available on the terminal
 tab. It will say "Python Debug Console" because the rp6502.py tool is Python.
 Ctrl-A then X will exit. Ctrl-A then B will send a break.
 
 Edit `CMakeLists.txt` to add new source and asset files. From here on, it's
+<<<<<<< HEAD
 standard C/assembly development for the 6502 platform.
+=======
+standard C/C++/assembly development for the 6502 platform.
+>>>>>>> template/main

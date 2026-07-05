@@ -1,5 +1,10 @@
 {
     "recommendations": [
         "ms-vscode.cpptools-extension-pack",
+<<<<<<< HEAD
+=======
+        "llvm-vs-code-extensions.lldb-dap",
+        "ms-python.python",
+>>>>>>> template/main
     ]
 }
